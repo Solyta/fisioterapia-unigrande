@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Estágio em Fisioterapia Coletiva</title>
+    <title>Plataforma de Estágio Supervisionado - Fisioterapia Coletiva</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts (Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -21,13 +21,14 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        brand: {
+                        teal: {
                             50: '#f0fdf4',
                             100: '#dcfce7',
                             500: '#10b981',
                             600: '#059669',
                             700: '#047857',
                             800: '#065f46',
+                            900: '#064e3b',
                         }
                     }
                 }
@@ -35,7 +36,7 @@
         }
     </script>
     <style>
-        /* Custom scrollbar for clean UI */
+        /* Custom scrollbar for desktop & mobile */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -50,726 +51,897 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        .tab-active {
+            border-bottom: 3px solid #059669;
+            color: #059669;
+            font-weight: 700;
+        }
     </style>
 </head>
-<body class="font-sans antialiased h-full text-slate-800 flex flex-col bg-slate-50">
+<body class="font-sans antialiased h-full text-slate-800 flex flex-col bg-slate-50 min-h-screen">
 
-    <!-- Toast Notification Box -->
+    <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-in-out pointer-events-none flex items-center gap-3 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-slate-700">
         <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
         <span id="toast-message" class="text-sm font-medium">Ação realizada com sucesso!</span>
     </div>
 
-    <!-- Top Navigation Header -->
+    <!-- Header Navigation -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-teal-500/20">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-700 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-teal-600/20">
                         <i class="fa-solid fa-hand-holding-medical text-xl"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 class="font-bold text-slate-900 text-lg leading-tight">FisioColetiva</h1>
+                            <h1 class="font-extrabold text-slate-900 text-lg leading-tight">FisioColetiva</h1>
                             <span class="bg-teal-50 text-teal-700 border border-teal-200/80 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
-                                Academic Edition
+                                Semana Acadêmica
                             </span>
                         </div>
-                        <p class="text-xs text-slate-500 hidden sm:block">Plataforma de Estágio Supervisionado em Fisioterapia Coletiva</p>
+                        <p class="text-xs text-slate-500 hidden sm:block">Plataforma Integrada de Estágio Supervisionado em Saúde Coletiva</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-4">
-                    <div class="hidden md:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200/80 text-xs text-slate-600 font-medium">
-                        <i class="fa-solid fa-graduation-cap text-teal-600"></i>
-                        <span>Semana Acadêmica 2026</span>
+                    <div class="hidden lg:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-600 font-medium">
+                        <i class="fa-solid fa-user-graduate text-teal-600"></i>
+                        <span>Supervisor: <strong id="header-supervisor-name">Profª. Dra. Helena Castro</strong></span>
                     </div>
-                    <button onclick="resetData()" title="Restaurar dados iniciais" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors text-sm flex items-center gap-1.5">
+                    <button onclick="openNewPatientModal()" class="px-3.5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Novo Paciente</span>
+                    </button>
+                    <button onclick="resetData()" title="Resetar Dados de Exemplo" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition text-xs">
                         <i class="fa-solid fa-rotate"></i>
-                        <span class="text-xs font-medium hidden sm:inline">Resetar</span>
                     </button>
                 </div>
+            </div>
+
+            <!-- Tab Navigation Bar -->
+            <div class="flex space-x-6 border-t border-slate-100 overflow-x-auto no-scrollbar text-xs font-semibold text-slate-500">
+                <button onclick="switchTab('tab-filas')" id="btn-tab-filas" class="tab-btn py-3 px-1 flex items-center gap-2 whitespace-nowrap tab-active">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Filas de Atendimento</span>
+                </button>
+                <button onclick="switchTab('tab-prontuario')" id="btn-tab-prontuario" class="tab-btn py-3 px-1 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-notes-medical"></i>
+                    <span>Prontuário & SOAP</span>
+                </button>
+                <button onclick="switchTab('tab-avaliacao')" id="btn-tab-avaliacao" class="tab-btn py-3 px-1 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span>Avaliação Fisioterapêutica</span>
+                </button>
+                <button onclick="switchTab('tab-cadastro')" id="btn-tab-cadastro" class="tab-btn py-3 px-1 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>Dados Cadastrais</span>
+                </button>
+                <button onclick="switchTab('tab-equipe')" id="btn-tab-equipe" class="tab-btn py-3 px-1 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span>Equipe de Estagiários</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
+    <!-- Main Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- Top Overview & Dashboard Metrics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total na Fila</p>
-                        <h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">0</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
+        <!-- Top Metrics Counters -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Geral</p>
+                    <h3 id="stat-total" class="text-2xl font-black text-slate-900 mt-0.5">0</h3>
                 </div>
-                <p class="text-xs text-slate-500 mt-3 flex items-center gap-1">
-                    <span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span> Pacientes cadastrados no dia
-                </p>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-users"></i>
+                </div>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Aguardando</p>
-                        <h3 id="stat-waiting" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-clock"></i>
-                    </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Aguardando na Fila</p>
+                    <h3 id="stat-waiting" class="text-2xl font-black text-amber-600 mt-0.5">0</h3>
                 </div>
-                <p class="text-xs text-slate-500 mt-3 flex items-center gap-1">
-                    <span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span> Prontos para atendimento
-                </p>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Em Atendimento</p>
-                        <h3 id="stat-active" class="text-3xl font-bold text-teal-600 mt-1">0</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-heart-pulse"></i>
-                    </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Em Atendimento</p>
+                    <h3 id="stat-active" class="text-2xl font-black text-teal-600 mt-0.5">0</h3>
                 </div>
-                <p class="text-xs text-slate-500 mt-3 flex items-center gap-1">
-                    <span class="inline-block w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> Atendimentos em progresso
-                </p>
+                <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Alta Prioridade</p>
-                        <h3 id="stat-high-priority" class="text-3xl font-bold text-rose-600 mt-1">0</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Concluídos Hoje</p>
+                    <h3 id="stat-completed" class="text-2xl font-black text-emerald-600 mt-0.5">0</h3>
                 </div>
-                <p class="text-xs text-slate-500 mt-3 flex items-center gap-1">
-                    <span class="inline-block w-2 h-2 rounded-full bg-rose-500"></span> Requer atenção imediata
-                </p>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
             </div>
         </div>
 
-        <!-- Secondary Section: Registration Form & Filter Controls -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
-            <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleForm()">
+        <!-- Selected Patient Alert Banner -->
+        <div id="selected-patient-bar" class="bg-slate-900 text-white px-5 py-3 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-md">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm font-bold">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Paciente/Grupo Ativo em Foco</span>
+                    <h3 id="current-patient-title" class="font-bold text-sm">Carregando...</h3>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="current-patient-group" class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-teal-300 font-medium">Grupo: --</span>
+                <span id="current-patient-interns" class="text-xs px-2.5 py-1 bg-slate-800 rounded-lg text-slate-300">Estagiários: --</span>
+            </div>
+        </div>
+
+        <!-- ================= TAB 1: FILAS DE ATENDIMENTO ================= -->
+        <section id="tab-filas" class="tab-content space-y-6">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-sm">
-                        <i class="fa-solid fa-user-plus"></i>
+                        <i class="fa-solid fa-filter"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-slate-900 text-base">Nova Triagem / Adicionar Paciente ou Grupo</h2>
-                        <p class="text-xs text-slate-500">Cadastre um novo paciente com prioridade e sinais vitais iniciais</p>
+                        <h2 class="font-bold text-slate-900 text-sm">Filtros da Fila Coletiva</h2>
+                        <p class="text-xs text-slate-500">Organize os grupos por nível de prioridade ou especialidade coletiva</p>
                     </div>
                 </div>
-                <button id="form-toggle-btn" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-transform duration-200">
-                    <i class="fa-solid fa-chevron-down"></i>
-                </button>
+
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <select id="filter-group" onchange="renderQueues()" class="px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-xl outline-none bg-white">
+                        <option value="ALL">Todos os Grupos</option>
+                        <option value="Grupo Coluna Saúde">Grupo Coluna Saúde</option>
+                        <option value="Grupo Terceira Idade Ativa">Grupo Terceira Idade Ativa</option>
+                        <option value="Grupo Saúde do Trabalhador">Grupo Saúde do Trabalhador</option>
+                        <option value="Grupo Neurologia Coletiva">Grupo Neurologia Coletiva</option>
+                    </select>
+
+                    <select id="filter-priority" onchange="renderQueues()" class="px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-xl outline-none bg-white">
+                        <option value="ALL">Todas as Prioridades</option>
+                        <option value="Alta">🔴 Alta Prioridade</option>
+                        <option value="Média">🟡 Média Prioridade</option>
+                        <option value="Baixa">🟢 Baixa Prioridade</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Expandable Form -->
-            <form id="triage-form" onsubmit="handleFormSubmit(event)" class="mt-5 border-t border-slate-100 pt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 hidden">
-                <div class="space-y-1.5 md:col-span-2 lg:col-span-1">
-                    <label class="text-xs font-semibold text-slate-700">Nome / Nome do Grupo <span class="text-rose-500">*</span></label>
-                    <input type="text" id="input-name" required placeholder="Ex: Maria Silva ou Grupo Coluna" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition">
+            <!-- Kanban Boards for Queue Statuses -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Column 1: Aguardando -->
+                <div class="bg-slate-100/70 p-4 rounded-2xl border border-slate-200/80 flex flex-col space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <h3 class="font-bold text-slate-800 text-sm">Aguardando na Fila</h3>
+                        </div>
+                        <span id="badge-count-waiting" class="text-xs bg-amber-100 text-amber-800 font-extrabold px-2 py-0.5 rounded-full">0</span>
+                    </div>
+                    <div id="queue-waiting-container" class="space-y-3 flex-1 min-h-[300px]">
+                        <!-- Dynamic Queue Cards -->
+                    </div>
                 </div>
 
-                <div class="space-y-1.5 md:col-span-2 lg:col-span-1">
-                    <label class="text-xs font-semibold text-slate-700">Condição / Diagnóstico <span class="text-rose-500">*</span></label>
-                    <input type="text" id="input-condition" required placeholder="Ex: Lombalgia Crônica ou Artrose" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition">
+                <!-- Column 2: Em Atendimento -->
+                <div class="bg-teal-50/50 p-4 rounded-2xl border border-teal-100 flex flex-col space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-teal-200/60">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-teal-500 animate-pulse"></span>
+                            <h3 class="font-bold text-teal-900 text-sm">Em Atendimento</h3>
+                        </div>
+                        <span id="badge-count-active" class="text-xs bg-teal-100 text-teal-800 font-extrabold px-2 py-0.5 rounded-full">0</span>
+                    </div>
+                    <div id="queue-active-container" class="space-y-3 flex-1 min-h-[300px]">
+                        <!-- Dynamic Queue Cards -->
+                    </div>
                 </div>
 
-                <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-slate-700">Nível de Prioridade</label>
-                    <select id="input-priority" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition bg-white">
-                        <option value="Baixa">🟢 Baixa (Rotina/Manutenção)</option>
-                        <option value="Média" selected>🟡 Média (Moderada)</option>
-                        <option value="Alta">🔴 Alta (Sintomas Agudos)</option>
-                    </select>
+                <!-- Column 3: Concluído -->
+                <div class="bg-slate-100/70 p-4 rounded-2xl border border-slate-200/80 flex flex-col space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <h3 class="font-bold text-slate-800 text-sm">Concluído Hoje</h3>
+                        </div>
+                        <span id="badge-count-completed" class="text-xs bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full">0</span>
+                    </div>
+                    <div id="queue-completed-container" class="space-y-3 flex-1 min-h-[300px]">
+                        <!-- Dynamic Queue Cards -->
+                    </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-slate-700">PA (Pressão Arterial)</label>
-                    <input type="text" id="input-pa" placeholder="Ex: 120/80 mmHg" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition">
-                </div>
+        <!-- ================= TAB 2: PRONTUÁRIO & SOAP ================= -->
+        <section id="tab-prontuario" class="tab-content space-y-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Column: Vital Signs & Internship Responsibles (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <!-- Vital Signs Card -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-heart-pulse text-rose-500"></i>
+                                Monitoramento de Sinais Vitais
+                            </h3>
+                            <button onclick="saveVitals()" class="text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg hover:bg-teal-100 transition">
+                                Salvar Sinais
+                            </button>
+                        </div>
 
-                <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-slate-700">FC (Freq. Cardíaca)</label>
-                    <input type="text" id="input-fc" placeholder="Ex: 75 bpm" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition">
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-slate-700">SpO2 (Saturação O2)</label>
-                    <input type="text" id="input-spo2" placeholder="Ex: 98%" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition">
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-slate-700">Dor Escala EVA (0-10)</label>
-                    <select id="input-eva" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition bg-white">
-                        <option value="0/10">0/10 - Sem Dor</option>
-                        <option value="2/10">2/10 - Dor Leve</option>
-                        <option value="4/10" selected>4/10 - Dor Moderada</option>
-                        <option value="6/10">6/10 - Dor Intensa</option>
-                        <option value="8/10">8/10 - Dor Muita Intensa</option>
-                        <option value="10/10">10/10 - Dor Insuportável</option>
-                    </select>
-                </div>
-
-                <div class="md:col-span-2 lg:col-span-4 flex justify-end gap-3 pt-2">
-                    <button type="button" onclick="toggleForm()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-2">
-                        <i class="fa-solid fa-check"></i> Inserir na Fila
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Main Workspace: Queue & Medical Record Side-by-Side -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-            <!-- Left Panel: Queue Management (7 cols) -->
-            <div class="lg:col-span-7 space-y-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 class="font-bold text-slate-900 text-base">Fila de Atendimento Coletivo</h2>
-                        <p class="text-xs text-slate-500">Selecione um paciente para abrir seu prontuário detalhado</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Pressão Arterial (PA)</label>
+                                <input type="text" id="vital-pa" placeholder="120/80 mmHg" class="w-full bg-white px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Freq. Cardíaca (FC)</label>
+                                <input type="text" id="vital-fc" placeholder="75 bpm" class="w-full bg-white px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Saturação O2 (SpO2)</label>
+                                <input type="text" id="vital-spo2" placeholder="98%" class="w-full bg-white px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Freq. Respiratória (FR)</label>
+                                <input type="text" id="vital-fr" placeholder="16 ipm" class="w-full bg-white px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div class="col-span-2 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Escala de Dor EVA (0 - 10)</label>
+                                <select id="vital-eva" class="w-full bg-white px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="0/10">0/10 - Sem Dor</option>
+                                    <option value="2/10">2/10 - Dor Leve</option>
+                                    <option value="4/10">4/10 - Dor Moderada</option>
+                                    <option value="6/10">6/10 - Dor Intensa</option>
+                                    <option value="8/10">8/10 - Dor Muito Intensa</option>
+                                    <option value="10/10">10/10 - Pior Dor Possível</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Filter Controls -->
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <div class="relative flex-1 sm:w-40">
-                            <select id="filter-status" onchange="renderQueue()" class="w-full pl-3 pr-8 py-1.5 text-xs font-medium border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none bg-white">
-                                <option value="ALL">Todos os Status</option>
-                                <option value="Aguardando">Aguardando</option>
-                                <option value="Em Atendimento">Em Atendimento</option>
-                                <option value="Concluído">Concluído</option>
-                            </select>
+                    <!-- Assign Interns Card -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-user-graduate text-teal-600"></i>
+                            Estagiários Responsáveis do Dia
+                        </h3>
+                        <p class="text-xs text-slate-500">Selecione os estagiários encarregados por este atendimento:</p>
+                        
+                        <div id="intern-checkboxes-container" class="space-y-2 pt-1 max-h-40 overflow-y-auto">
+                            <!-- Populated dynamically via JS -->
                         </div>
-                        <button onclick="toggleSort()" id="sort-btn" title="Alternar Ordenação" class="px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-xl hover:bg-slate-50 transition flex items-center gap-1.5 text-slate-700 whitespace-nowrap">
-                            <i class="fa-solid fa-arrow-down-wide-short text-teal-600"></i>
-                            <span>Prioridade</span>
+                        <button onclick="saveAssignedInterns()" class="w-full mt-2 py-2 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 rounded-xl border border-teal-200/60 transition">
+                            Atualizar Atribuição de Estagiários
                         </button>
                     </div>
                 </div>
 
-                <!-- Patient Cards List Container -->
-                <div id="patient-queue-list" class="space-y-3 min-h-[300px]">
-                    <!-- Dynamically Rendered via JS -->
-                </div>
-            </div>
-
-            <!-- Right Panel: Electronic Health Record - SOAP (5 cols) -->
-            <div class="lg:col-span-5">
-                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm sticky top-24 overflow-hidden flex flex-col">
-                    
-                    <!-- EHR Header -->
-                    <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-[10px] uppercase tracking-wider font-bold text-teal-400 bg-teal-950/80 px-2.5 py-1 rounded-full border border-teal-800/50">
-                                    Prontuário & Evolução SOAP
-                                </span>
-                                <h3 id="ehr-patient-name" class="text-lg font-bold mt-2">Nenhum Paciente Selecionado</h3>
-                                <p id="ehr-patient-condition" class="text-xs text-slate-300 mt-0.5">Selecione um paciente na fila ao lado</p>
-                            </div>
-                            <div id="ehr-priority-badge">
-                                <!-- Badge added dynamically -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- EHR Content (Hidden or disabled if no selection) -->
-                    <div id="ehr-body" class="p-5 space-y-5">
-                        
-                        <!-- Vital Signs Live Editing Box -->
-                        <div>
-                            <div class="flex justify-between items-center mb-3">
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-heart-pulse text-rose-500"></i>
-                                    Sinais Vitais Pré/Pós Sessão
-                                </h4>
-                                <span class="text-[10px] text-slate-400">Edição em Tempo Real</span>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                                    <label class="text-[10px] font-semibold text-slate-400 uppercase block mb-1">Pressão Arterial</label>
-                                    <input type="text" id="ehr-pa" onblur="updateCurrentVitals()" class="w-full bg-white px-2 py-1 text-xs border border-slate-200 rounded-lg font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none">
-                                </div>
-                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                                    <label class="text-[10px] font-semibold text-slate-400 uppercase block mb-1">Freq. Cardíaca</label>
-                                    <input type="text" id="ehr-fc" onblur="updateCurrentVitals()" class="w-full bg-white px-2 py-1 text-xs border border-slate-200 rounded-lg font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none">
-                                </div>
-                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                                    <label class="text-[10px] font-semibold text-slate-400 uppercase block mb-1">Saturação O2</label>
-                                    <input type="text" id="ehr-spo2" onblur="updateCurrentVitals()" class="w-full bg-white px-2 py-1 text-xs border border-slate-200 rounded-lg font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none">
-                                </div>
-                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                                    <label class="text-[10px] font-semibold text-slate-400 uppercase block mb-1">Dor (EVA)</label>
-                                    <input type="text" id="ehr-eva" onblur="updateCurrentVitals()" class="w-full bg-white px-2 py-1 text-xs border border-slate-200 rounded-lg font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500 outline-none">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- SOAP Notes & Evolution Area -->
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <!-- Right Column: Evolution SOAP Notes (7 cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
                                 <i class="fa-solid fa-notes-medical text-teal-600"></i>
-                                Nova Evolução Fisioterapêutica
-                            </label>
-                            <textarea id="ehr-notes-input" rows="4" placeholder="Descreva os exercícios realizados, resposta do paciente, conduta e observações para o relatório do estágio..." class="w-full p-3 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none resize-none transition"></textarea>
-                            <div class="flex justify-between items-center pt-1">
-                                <span class="text-[10px] text-slate-400">Pressione 'Salvar' para atualizar o prontuário.</span>
-                                <button onclick="saveEvolution()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-floppy-disk text-teal-400"></i> Salvar Evolução
-                                </button>
-                            </div>
+                                Registro de Evolução Fisioterapêutica (SOAP)
+                            </h3>
+                            <span class="text-xs text-slate-400">Método Acadêmico SOAP</span>
                         </div>
 
-                        <!-- History Log -->
-                        <div class="border-t border-slate-100 pt-4">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
-                                <i class="fa-solid fa-clock-rotate-left text-slate-400"></i>
-                                Histórico do Prontuário
-                            </h4>
-                            <div id="ehr-history" class="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                                <!-- History timeline items dynamically inserted -->
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-xs font-bold text-teal-800 uppercase tracking-wider block mb-1">
+                                    [S] Subjetivo
+                                </label>
+                                <textarea id="soap-s" rows="2" placeholder="Queixas do paciente, como se sentiu durante a semana, relato da dor..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
                             </div>
-                        </div>
 
+                            <div>
+                                <label class="text-xs font-bold text-teal-800 uppercase tracking-wider block mb-1">
+                                    [O] Objetivo
+                                </label>
+                                <textarea id="soap-o" rows="2" placeholder="Exercícios realizados em grupo, cargas, repetições, dados do exame físico..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-teal-800 uppercase tracking-wider block mb-1">
+                                    [A] Avaliação
+                                </label>
+                                <textarea id="soap-a" rows="2" placeholder="Resposta aos exercícios, tolerância aeróbica/muscular, intercorrências..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-bold text-teal-800 uppercase tracking-wider block mb-1">
+                                    [P] Plano
+                                </label>
+                                <textarea id="soap-p" rows="2" placeholder="Orientação para casa, progressão para a próxima sessão coletiva..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                            </div>
+
+                            <button onclick="saveSoapEvolution()" class="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-md shadow-teal-600/20 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Registrar Evolução no Prontuário
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- History Timeline -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Evoluções Anteriores
+                        </h4>
+                        <div id="ehr-history-container" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                            <!-- Dynamic History List -->
+                        </div>
                     </div>
                 </div>
             </div>
+        </section>
 
-        </div>
+        <!-- ================= TAB 3: AVALIAÇÃO FISIOTERAPÊUTICA ================= -->
+        <section id="tab-avaliacao" class="tab-content space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+                <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="font-bold text-slate-900 text-lg">Ficha de Avaliação Cinesiocoletiva & Funcional</h2>
+                        <p class="text-xs text-slate-500">Instrumento de avaliação para admissão nos grupos de fisioterapia preventiva e coletiva</p>
+                    </div>
+                    <button onclick="saveAssessment()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Avaliação
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Anamnese -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-teal-800 border-b border-teal-100 pb-1">Anamnese Clínica</h3>
+                        
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">Queixa Principal (QP)</label>
+                            <textarea id="eval-qp" rows="2" placeholder="Sintoma ou limitação que motivou a busca pelo grupo..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">História da Moléstia Atual (HMA)</label>
+                            <textarea id="eval-hma" rows="3" placeholder="Início dos sintomas, evolução, fatores de melhora e piora..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Physical Examination -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-teal-800 border-b border-teal-100 pb-1">Exame Físico-Funcional</h3>
+                        
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">Amplitude de Movimento (ADM) e Flexibilidade</label>
+                            <input type="text" id="eval-adm" placeholder="Ex: Limitação discreta na flexão lombar (Banco de Wells: 18cm)" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">Força Muscular & Testes Específicos</label>
+                            <input type="text" id="eval-force" placeholder="Ex: Grau 4 em membros inferiores; Teste de Lasegue negativo" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 block mb-1">Avaliação Postural & Marcha / Equilíbrio</label>
+                            <input type="text" id="eval-posture" placeholder="Ex: Hipercifose torácica compensada; marcha autônoma sem apoio" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Treatment Plan -->
+                <div class="space-y-3 border-t border-slate-100 pt-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-teal-800">Objetivos do Tratamento Coletivo & Conduta</h3>
+                    <textarea id="eval-plan" rows="3" placeholder="Defina as metas a curto e longo prazo (ex: ganho de amplitude, fortalecimento de core, treino proprioceptivo em grupo)..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: DADOS CADASTRAIS ================= -->
+        <section id="tab-cadastro" class="tab-content space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+                <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="font-bold text-slate-900 text-lg">Cadastro do Participante / Grupo</h2>
+                        <p class="text-xs text-slate-500">Dados demográficos, informações de contato e alertas de saúde</p>
+                    </div>
+                    <button onclick="saveDemographics()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Dados Cadastrais
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Nome Completo / Nome do Grupo</label>
+                        <input type="text" id="reg-fullname" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">CPF / Documento Identificador</label>
+                        <input type="text" id="reg-cpf" placeholder="000.000.000-00" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Idade / Faixa Etária</label>
+                        <input type="text" id="reg-age" placeholder="Ex: 68 anos" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Telefone de Contato</label>
+                        <input type="text" id="reg-phone" placeholder="(00) 90000-0000" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Contato de Emergência</label>
+                        <input type="text" id="reg-emergency" placeholder="Nome e Telefone do Responsável" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Grupo de Fisioterapia Coletiva</label>
+                        <select id="reg-group" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                            <option value="Grupo Coluna Saúde">Grupo Coluna Saúde</option>
+                            <option value="Grupo Terceira Idade Ativa">Grupo Terceira Idade Ativa</option>
+                            <option value="Grupo Saúde do Trabalhador">Grupo Saúde do Trabalhador</option>
+                            <option value="Grupo Neurologia Coletiva">Grupo Neurologia Coletiva</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-3 space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Endereço Completo</label>
+                        <input type="text" id="reg-address" placeholder="Rua, Número, Bairro, Cidade" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-700">Comorbidades / Histórico Médico</label>
+                            <textarea id="reg-comorbidities" rows="3" placeholder="Ex: Hipertensão Arterial, Diabetes Mellitus Tipo 2, Osteoporose..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-700">Medicamentos em Uso & Precauções/Alergias</label>
+                            <textarea id="reg-meds" rows="3" placeholder="Ex: Losartana 50mg, Paracetamol; Cuidado com hipotensão postural..." class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: EQUIPE DE ESTAGIÁRIOS ================= -->
+        <section id="tab-equipe" class="tab-content space-y-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left: Supervisor Settings (4 cols) -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-user-shield text-teal-600"></i>
+                            Professor Supervisor / Docente
+                        </h3>
+                        <div class="space-y-2">
+                            <label class="text-xs text-slate-600">Nome do Supervisor do Dia</label>
+                            <input type="text" id="input-supervisor" value="Profª. Dra. Helena Castro" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <button onclick="updateSupervisor()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition">
+                            Atualizar Supervisor
+                        </button>
+                    </div>
+
+                    <!-- Register New Intern Form -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus text-teal-600"></i>
+                            Cadastrar Novo Estagiário
+                        </h3>
+                        <form onsubmit="handleAddIntern(event)" class="space-y-3">
+                            <div>
+                                <label class="text-xs text-slate-600 font-medium">Nome do Estagiário(a)</label>
+                                <input type="text" id="new-intern-name" required placeholder="Ex: Lucas Andrade" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-600 font-medium">Matrícula / Período</label>
+                                <input type="text" id="new-intern-id" placeholder="Ex: MAT-2024.2 • 8º Período" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <button type="submit" class="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl shadow-md shadow-teal-600/20 transition">
+                                Cadastrar na Equipe
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right: List of Registered Interns (8 cols) -->
+                <div class="lg:col-span-8 space-y-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base">Corpo de Estagiários</h3>
+                                <p class="text-xs text-slate-500">Alunos matriculados no Estágio Supervisionado em Fisioterapia Coletiva</p>
+                            </div>
+                            <span id="intern-count-badge" class="bg-teal-100 text-teal-800 text-xs font-extrabold px-3 py-1 rounded-full">0 Alunos</span>
+                        </div>
+
+                        <div id="interns-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Dynamically Filled -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- App JavaScript Logic -->
+    <!-- Modal: Adicionar Novo Paciente / Triagem -->
+    <div id="modal-new-patient" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-lg w-full rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+            <div class="bg-slate-900 text-white p-4 px-6 flex justify-between items-center">
+                <h3 class="font-bold text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-teal-400"></i>
+                    Nova Triagem de Fisioterapia Coletiva
+                </h3>
+                <button onclick="closeNewPatientModal()" class="text-slate-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleCreatePatient(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 block mb-1">Nome Completo / Nome do Grupo *</label>
+                    <input type="text" id="modal-name" required placeholder="Ex: Maria Silva ou Grupo Coluna" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-700 block mb-1">Grupo de Fisioterapia</label>
+                        <select id="modal-group" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                            <option value="Grupo Coluna Saúde">Grupo Coluna Saúde</option>
+                            <option value="Grupo Terceira Idade Ativa">Grupo Terceira Idade Ativa</option>
+                            <option value="Grupo Saúde do Trabalhador">Grupo Saúde do Trabalhador</option>
+                            <option value="Grupo Neurologia Coletiva">Grupo Neurologia Coletiva</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-semibold text-slate-700 block mb-1">Prioridade Clínica</label>
+                        <select id="modal-priority" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                            <option value="Média">🟡 Média Prioridade</option>
+                            <option value="Alta">🔴 Alta Prioridade</option>
+                            <option value="Baixa">🟢 Baixa Prioridade</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 block mb-1">Condição / Diagnóstico Fisioterapêutico *</label>
+                    <input type="text" id="modal-condition" required placeholder="Ex: Lombalgia Crônica Postural" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-700 block mb-1">PA Inicial</label>
+                        <input type="text" id="modal-pa" placeholder="120/80 mmHg" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-700 block mb-1">FC Inicial</label>
+                        <input type="text" id="modal-fc" placeholder="75 bpm" class="w-full p-2.5 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end gap-3 border-t border-slate-100">
+                    <button type="button" onclick="closeNewPatientModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md transition">Cadastrar na Fila</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script Logic -->
     <script>
-        // Default Mock Data for Academic Presentation Demonstration
-        const initialPatients = [
+        // Sample Initial Data for Academic Presentation
+        const defaultInterns = [
+            { id: 'i1', nome: 'Beatriz Lima', matricula: 'MAT-2024.1 • 8º Período' },
+            { id: 'i2', nome: 'Gabriel Santos', matricula: 'MAT-2024.1 • 8º Período' },
+            { id: 'i3', nome: 'Mariana Costa', matricula: 'MAT-2023.2 • 9º Período' },
+            { id: 'i4', nome: 'Rodrigo Alves', matricula: 'MAT-2023.2 • 9º Período' }
+        ];
+
+        const defaultPatients = [
             {
                 id: 'p1',
-                nome: 'Grupo Saúde da Coluna (10 pac.)',
-                condicao: 'Lombalgia Crônica & Alterações Posturais',
+                nome: 'Grupo Coluna e Postura (12 pac.)',
+                grupo: 'Grupo Coluna Saúde',
+                condicao: 'Lombalgia Crônica Postural & Cervicalgia',
                 prioridade: 'Alta',
                 status: 'Aguardando',
-                sinaisVitais: { pa: '130/85 mmHg', fc: '78 bpm', spo2: '97%', eva: '7/10' },
-                historico: [
-                    { data: '20/10/2026 14:10', texto: 'Aguardando liberação de espaço no ginásio para iniciar cinesioterapia em grupo.' },
-                    { data: '18/10/2026 15:30', texto: 'Sessão anterior: Exercícios de mobilidade pélvica e ponte glútea executados com boa adesão.' }
+                estagiarios: ['Beatriz Lima', 'Gabriel Santos'],
+                sinaisVitais: { pa: '130/85 mmHg', fc: '78 bpm', spo2: '97%', fr: '16 ipm', eva: '7/10' },
+                demograficos: {
+                    cpf: '000.111.222-33',
+                    idade: 'Média 52 anos',
+                    telefone: '(81) 98877-6655',
+                    emergencia: 'Maria (Coordenadora da Associação)',
+                    endereco: 'Centro Comunitário - Bairro Universitário',
+                    comorbidades: 'Hipertensão em 4 participantes; 2 com osteopenia.',
+                    medicamentos: 'Losartana; Analgésicos se houver dor.'
+                },
+                avaliacao: {
+                    qp: 'Dor lombar intensa ao permanecer muito tempo sentado ou ao carregar peso.',
+                    hma: 'Sintomas crônicos com mais de 2 anos de evolução. Piora no final do dia.',
+                    adm: 'Flexão de tronco reduzida. Teste de Schober: 13 cm.',
+                    forca: 'Grau 3+ para musculatura abdominal e extensores profundos de coluna.',
+                    postura: 'Hipercifose torácica e hiperlordose lombar compensatória.',
+                    plano: 'Treino de controle motor, fortalecimento de CORE em grupo e automassagem com bola.'
+                },
+                historicoSOAP: [
+                    { data: '20/10/2026 14:00', texto: '[S] Grupo relata dor moderada pré-exercício.\n[O] PA pré-sessão checada.\n[A] Triados e prontos para aula coletiva.\n[P] Exercícios de mobilidade vertebral.' }
                 ]
             },
             {
                 id: 'p2',
-                nome: 'Dona Maria Oliveira',
-                condicao: 'Osteoartrite de Joelho Bilateral',
+                nome: 'Dona Alzira Fernandes',
+                grupo: 'Grupo Terceira Idade Ativa',
+                condicao: 'Osteoartrite Bilateral de Joelho',
                 prioridade: 'Média',
                 status: 'Em Atendimento',
-                sinaisVitais: { pa: '120/80 mmHg', fc: '72 bpm', spo2: '98%', eva: '4/10' },
-                historico: [
-                    { data: '20/10/2026 14:30', texto: 'Atendimento iniciado. Realizando fortalecimento de quadríceps em cadeia cinemática fechada.' }
+                estagiarios: ['Mariana Costa'],
+                sinaisVitais: { pa: '120/80 mmHg', fc: '72 bpm', spo2: '98%', fr: '18 ipm', eva: '4/10' },
+                demograficos: {
+                    cpf: '123.456.789-00',
+                    idade: '71 anos',
+                    telefone: '(81) 99123-4567',
+                    emergencia: 'Filho (Carlos) - (81) 99888-1122',
+                    endereco: 'Rua das Flores, 120 - Apt 201',
+                    comorbidades: 'Osteoartrite e Hipertensão controlada.',
+                    medicamentos: 'Anti-hipertensivo pela manhã.'
+                },
+                avaliacao: {
+                    qp: 'Dificuldade para subir degraus e rigidez matinal nos joelhos.',
+                    hma: 'Diagnóstico de gonartrose há 5 anos. Realiza caminhadas leves.',
+                    adm: 'Flexão de joelho D: 115°, J: 110°.',
+                    forca: 'Grau 4 para quadríceps e glúteo médio.',
+                    postura: 'Genu varo discreto bilateral.',
+                    plano: 'Fortalecimento em cadeia cinemática fechada, treino proprioceptivo e senta-levanta.'
+                },
+                historicoSOAP: [
+                    { data: '20/10/2026 14:20', texto: '[S] Relata rigidez leve no joelho esquerdo.\n[O] Executou 3 séries de 10 reps de ponte glútea e agachamento adaptado.\n[A] Boa tolerância aeróbica.\n[P] Manter conduta na próxima sessão.' }
                 ]
             },
             {
                 id: 'p3',
-                nome: 'Grupo Idosos Ativos (08 pac.)',
-                condicao: 'Treino de Equilíbrio & Prevenção de Quedas',
+                nome: 'Seu Antônio Bezerra',
+                grupo: 'Grupo Saúde do Trabalhador',
+                condicao: 'Tendinopatia de Ombros (LER/DORT)',
                 prioridade: 'Baixa',
-                status: 'Aguardando',
-                sinaisVitais: { pa: '118/75 mmHg', fc: '68 bpm', spo2: '99%', eva: '2/10' },
-                historico: [
-                    { data: '20/10/2026 14:00', texto: 'Sinais vitais checados na recepção. Todos aptos para o circuito funcional.' }
-                ]
-            },
-            {
-                id: 'p4',
-                nome: 'Sr. João Batista',
-                condicao: 'Pós-Op Reconstrução LCA (Fase Final)',
-                prioridade: 'Alta',
                 status: 'Concluído',
-                sinaisVitais: { pa: '125/82 mmHg', fc: '80 bpm', spo2: '98%', eva: '1/10' },
-                historico: [
-                    { data: '20/10/2026 13:45', texto: 'Treino proprioceptivo concluído com sucesso. Sem relato de dor ou instabilidade articular.' }
+                estagiarios: ['Rodrigo Alves'],
+                sinaisVitais: { pa: '118/75 mmHg', fc: '68 bpm', spo2: '99%', fr: '15 ipm', eva: '2/10' },
+                demograficos: {
+                    cpf: '987.654.321-11',
+                    idade: '54 anos',
+                    telefone: '(81) 98765-4321',
+                    emergencia: 'Esposa (Lúcia) - (81) 98111-2233',
+                    endereco: 'Av. Principal, 450',
+                    comorbidades: 'Sem comorbidades relatadas.',
+                    medicamentos: 'Nenhum de uso contínuo.'
+                },
+                avaliacao: {
+                    qp: 'Dor e cansaço nos ombros após jornada de trabalho.',
+                    hma: 'Trabalha como digitador. Queixas há 8 meses.',
+                    adm: 'Elevação anterior de ombro completa com dor nos últimos graus.',
+                    forca: 'Grau 4+ para manguito rotador.',
+                    postura: 'Protração de ombros e cabeça adiantada.',
+                    plano: 'Cinesiologia laboral, alongamento de peitorais e fortalecimento de romboides.'
+                },
+                historicoSOAP: [
+                    { data: '20/10/2026 13:30', texto: '[S] Paciente assintomático hoje.\n[O] Circuito de fortalecimento com teraband concluído.\n[A] Alta evolução no padrão motor.\n[P] Sessão finalizada com sucesso.' }
                 ]
             }
         ];
 
         // State variables
         let patients = [];
+        let interns = [];
+        let currentSupervisor = 'Profª. Dra. Helena Castro';
         let selectedPatientId = null;
-        let sortByPriority = true;
 
-        // Initialize App
+        // Initialize App on Load
         window.addEventListener('DOMContentLoaded', () => {
-            loadData();
+            loadFromStorage();
             if (patients.length > 0) {
                 selectedPatientId = patients[0].id;
             }
-            renderQueue();
-            renderEHR();
+            renderAll();
         });
 
-        // Save and Load from LocalStorage
-        function saveData() {
-            localStorage.setItem('fisio_coletiva_data', JSON.stringify(patients));
+        // LocalStorage Helpers
+        function saveToStorage() {
+            localStorage.setItem('fisio_app_patients', JSON.stringify(patients));
+            localStorage.setItem('fisio_app_interns', JSON.stringify(interns));
+            localStorage.setItem('fisio_app_supervisor', currentSupervisor);
         }
 
-        function loadData() {
-            const stored = localStorage.getItem('fisio_coletiva_data');
-            if (stored) {
-                try {
-                    patients = JSON.parse(stored);
-                } catch(e) {
-                    patients = [...initialPatients];
-                }
-            } else {
-                patients = [...initialPatients];
-            }
+        function loadFromStorage() {
+            const p = localStorage.getItem('fisio_app_patients');
+            const i = localStorage.getItem('fisio_app_interns');
+            const s = localStorage.getItem('fisio_app_supervisor');
+
+            patients = p ? JSON.parse(p) : [...defaultPatients];
+            interns = i ? JSON.parse(i) : [...defaultInterns];
+            if (s) currentSupervisor = s;
         }
 
         function resetData() {
-            patients = JSON.parse(JSON.stringify(initialPatients));
+            patients = JSON.parse(JSON.stringify(defaultPatients));
+            interns = JSON.parse(JSON.stringify(defaultInterns));
+            currentSupervisor = 'Profª. Dra. Helena Castro';
             selectedPatientId = patients[0].id;
-            saveData();
-            renderQueue();
+            saveToStorage();
+            renderAll();
+            showToast('Dados de demonstração restaurados!');
+        }
+
+        // Render Everything
+        function renderAll() {
+            document.getElementById('header-supervisor-name').innerText = currentSupervisor;
+            document.getElementById('input-supervisor').value = currentSupervisor;
+            
+            updateMetrics();
+            renderSelectedPatientBar();
+            renderQueues();
             renderEHR();
-            showToast('Dados de demonstração restaurados!', 'fa-rotate');
+            renderAssessment();
+            renderDemographics();
+            renderInternsTab();
         }
 
-        // Form Collapsible Toggle
-        function toggleForm() {
-            const form = document.getElementById('triage-form');
-            const btn = document.getElementById('form-toggle-btn');
-            const isHidden = form.classList.contains('hidden');
-            
-            if (isHidden) {
-                form.classList.remove('hidden');
-                btn.style.transform = 'rotate(180deg)';
-            } else {
-                form.classList.add('hidden');
-                btn.style.transform = 'rotate(0deg)';
-            }
+        // Tab Navigation Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-active'));
+
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('tab-active');
         }
 
-        // Add Patient
-        function handleFormSubmit(event) {
-            event.preventDefault();
-            
-            const name = document.getElementById('input-name').value.trim();
-            const condition = document.getElementById('input-condition').value.trim();
-            const priority = document.getElementById('input-priority').value;
-            const pa = document.getElementById('input-pa').value.trim() || '120/80 mmHg';
-            const fc = document.getElementById('input-fc').value.trim() || '75 bpm';
-            const spo2 = document.getElementById('input-spo2').value.trim() || '98%';
-            const eva = document.getElementById('input-eva').value;
-
-            const now = new Date();
-            const timestamp = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-            const newPatient = {
-                id: 'p_' + Date.now(),
-                nome: name,
-                condicao: condition,
-                prioridade: priority,
-                status: 'Aguardando',
-                sinaisVitais: { pa, fc, spo2, eva },
-                historico: [
-                    { data: timestamp, texto: `Triagem concluída. Ingressou na fila com prioridade ${priority}.` }
-                ]
-            };
-
-            patients.unshift(newPatient);
-            selectedPatientId = newPatient.id;
-            saveData();
-            
-            // Reset form fields
-            document.getElementById('triage-form').reset();
-            toggleForm();
-            
-            renderQueue();
-            renderEHR();
-            showToast('Paciente adicionado à fila com sucesso!');
-        }
-
-        // Priority Weight for Sorting
-        function getPriorityWeight(p) {
-            if (p === 'Alta') return 3;
-            if (p === 'Média') return 2;
-            return 1;
-        }
-
-        // Status Weight for Sorting
-        function getStatusWeight(s) {
-            if (s === 'Em Atendimento') return 3;
-            if (s === 'Aguardando') return 2;
-            return 1;
-        }
-
-        function toggleSort() {
-            sortByPriority = !sortByPriority;
-            const btn = document.getElementById('sort-btn');
-            if (sortByPriority) {
-                btn.innerHTML = `<i class="fa-solid fa-arrow-down-wide-short text-teal-600"></i> <span>Prioridade</span>`;
-            } else {
-                btn.innerHTML = `<i class="fa-solid fa-list-ol text-teal-600"></i> <span>Ordem de Entrada</span>`;
-            }
-            renderQueue();
-        }
-
-        // Update Statistics Counters
-        function updateStats() {
+        // Metrics Counters
+        function updateMetrics() {
             document.getElementById('stat-total').innerText = patients.length;
             document.getElementById('stat-waiting').innerText = patients.filter(p => p.status === 'Aguardando').length;
             document.getElementById('stat-active').innerText = patients.filter(p => p.status === 'Em Atendimento').length;
-            document.getElementById('stat-high-priority').innerText = patients.filter(p => p.prioridade === 'Alta' && p.status !== 'Concluído').length;
+            document.getElementById('stat-completed').innerText = patients.filter(p => p.status === 'Concluído').length;
         }
 
-        // Render Queue List
-        function renderQueue() {
-            updateStats();
-            const queueContainer = document.getElementById('patient-queue-list');
-            const statusFilter = document.getElementById('filter-status').value;
+        // Top Banner Active Patient Info
+        function renderSelectedPatientBar() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            const titleEl = document.getElementById('current-patient-title');
+            const groupEl = document.getElementById('current-patient-group');
+            const internsEl = document.getElementById('current-patient-interns');
 
-            let filtered = patients.filter(p => {
-                if (statusFilter === 'ALL') return true;
-                return p.status === statusFilter;
-            });
-
-            if (sortByPriority) {
-                filtered.sort((a, b) => {
-                    const statusDiff = getStatusWeight(b.status) - getStatusWeight(a.status);
-                    if (statusDiff !== 0) return statusDiff;
-                    return getPriorityWeight(b.prioridade) - getPriorityWeight(a.prioridade);
-                });
-            }
-
-            if (filtered.length === 0) {
-                queueContainer.innerHTML = `
-                    <div class="bg-white p-8 rounded-2xl border border-slate-200/80 text-center text-slate-400">
-                        <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
-                        <p class="text-sm">Nenhum paciente encontrado neste filtro.</p>
-                    </div>
-                `;
+            if (!patient) {
+                titleEl.innerText = 'Nenhum paciente selecionado';
+                groupEl.innerText = 'Grupo: --';
+                internsEl.innerText = 'Estagiários: --';
                 return;
             }
 
-            queueContainer.innerHTML = filtered.map(p => {
+            titleEl.innerText = `${patient.nome} (${patient.condicao})`;
+            groupEl.innerText = `Grupo: ${patient.grupo}`;
+            internsEl.innerText = `Estagiários: ${patient.estagiarios.length > 0 ? patient.estagiarios.join(', ') : 'Não atribuídos'}`;
+        }
+
+        // Queue KanBans Render
+        function renderQueues() {
+            const groupFilter = document.getElementById('filter-group').value;
+            const priorityFilter = document.getElementById('filter-priority').value;
+
+            let filtered = patients.filter(p => {
+                if (groupFilter !== 'ALL' && p.grupo !== groupFilter) return false;
+                if (priorityFilter !== 'ALL' && p.prioridade !== priorityFilter) return false;
+                return true;
+            });
+
+            const waitingList = filtered.filter(p => p.status === 'Aguardando');
+            const activeList = filtered.filter(p => p.status === 'Em Atendimento');
+            const completedList = filtered.filter(p => p.status === 'Concluído');
+
+            document.getElementById('badge-count-waiting').innerText = waitingList.length;
+            document.getElementById('badge-count-active').innerText = activeList.length;
+            document.getElementById('badge-count-completed').innerText = completedList.length;
+
+            document.getElementById('queue-waiting-container').innerHTML = renderQueueCards(waitingList);
+            document.getElementById('queue-active-container').innerHTML = renderQueueCards(activeList);
+            document.getElementById('queue-completed-container').innerHTML = renderQueueCards(completedList);
+        }
+
+        function renderQueueCards(list) {
+            if (list.length === 0) {
+                return `<div class="p-6 text-center text-xs text-slate-400 border border-dashed border-slate-300 rounded-xl">Nenhum paciente nesta fila.</div>`;
+            }
+
+            return list.map(p => {
                 const isSelected = p.id === selectedPatientId;
                 
-                // Priority Badge Styles
-                let badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                let dotStyle = 'bg-emerald-500';
-                if (p.prioridade === 'Alta') {
-                    badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
-                    dotStyle = 'bg-rose-500';
-                } else if (p.prioridade === 'Média') {
-                    badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
-                    dotStyle = 'bg-amber-500';
-                }
-
-                // Status Badge Styles
-                let statusBadge = 'bg-slate-100 text-slate-600';
-                if (p.status === 'Em Atendimento') statusBadge = 'bg-teal-100 text-teal-800 font-semibold';
-                if (p.status === 'Concluído') statusBadge = 'bg-emerald-100 text-emerald-800';
+                let priorityBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                if (p.prioridade === 'Alta') priorityBadge = 'bg-rose-50 text-rose-700 border-rose-200';
+                if (p.prioridade === 'Média') priorityBadge = 'bg-amber-50 text-amber-700 border-amber-200';
 
                 return `
                     <div onclick="selectPatient('${p.id}')" 
-                         class="bg-white p-4 rounded-2xl border transition-all cursor-pointer flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 ${
-                             isSelected 
-                             ? 'border-teal-500 ring-2 ring-teal-500/20 shadow-md bg-teal-50/10' 
-                             : 'border-slate-200/80 hover:border-slate-300 hover:shadow-sm'
+                         class="bg-white p-4 rounded-xl border transition cursor-pointer space-y-3 ${
+                             isSelected ? 'border-teal-500 ring-2 ring-teal-500/20 shadow-md' : 'border-slate-200 hover:border-slate-300 shadow-sm'
                          }">
-                        
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="w-2.5 h-2.5 rounded-full ${dotStyle}"></span>
-                                <h3 class="font-bold text-slate-900 text-sm sm:text-base">${p.nome}</h3>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider ${badgeStyle}">
-                                    ${p.prioridade}
-                                </span>
+                        <div class="flex justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${p.nome}</h4>
+                                <span class="text-[10px] text-teal-700 font-semibold bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">${p.grupo}</span>
                             </div>
-                            <p class="text-xs text-slate-500 flex items-center gap-1.5 pl-4">
-                                <i class="fa-solid fa-stethoscope text-slate-400 text-[10px]"></i>
-                                ${p.condicao}
-                            </p>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase ${priorityBadge}">${p.prioridade}</span>
                         </div>
 
-                        <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-0 border-slate-100">
-                            <span class="text-xs px-2.5 py-1 rounded-lg ${statusBadge}">
-                                ${p.status}
+                        <p class="text-xs text-slate-500 line-clamp-1"><i class="fa-solid fa-stethoscope text-slate-400"></i> ${p.condicao}</p>
+
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 text-[11px]">
+                            <span class="text-slate-400 flex items-center gap-1">
+                                <i class="fa-solid fa-user-graduate"></i>
+                                ${p.estagiarios.length > 0 ? p.estagiarios[0] : 'Sem estagiário'}
                             </span>
-                            
-                            <!-- Quick Status Actions -->
+
                             <div class="flex items-center gap-1" onclick="event.stopPropagation()">
                                 ${p.status === 'Aguardando' ? `
-                                    <button onclick="changeStatus('${p.id}', 'Em Atendimento')" title="Iniciar Atendimento" class="p-1.5 bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white rounded-lg transition text-xs flex items-center gap-1 px-2.5 font-medium">
-                                        <i class="fa-solid fa-play"></i> Iniciar
+                                    <button onclick="changePatientStatus('${p.id}', 'Em Atendimento')" class="px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-[10px] shadow-sm">
+                                        Chamar →
                                     </button>
                                 ` : ''}
 
                                 ${p.status === 'Em Atendimento' ? `
-                                    <button onclick="changeStatus('${p.id}', 'Concluído')" title="Concluir Atendimento" class="p-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded-lg transition text-xs flex items-center gap-1 px-2.5 font-medium">
-                                        <i class="fa-solid fa-check"></i> Concluir
+                                    <button onclick="changePatientStatus('${p.id}', 'Concluído')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] shadow-sm">
+                                        Finalizar ✓
                                     </button>
                                 ` : ''}
 
                                 ${p.status === 'Concluído' ? `
-                                    <button onclick="changeStatus('${p.id}', 'Aguardando')" title="Reiniciar/Mover para Fila" class="p-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition text-xs">
+                                    <button onclick="changePatientStatus('${p.id}', 'Aguardando')" class="px-2 py-1 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-[10px]" title="Devolver para Fila">
                                         <i class="fa-solid fa-rotate-left"></i>
                                     </button>
                                 ` : ''}
 
-                                <button onclick="deletePatient('${p.id}')" title="Excluir paciente" class="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition text-xs">
+                                <button onclick="deletePatient('${p.id}')" class="p-1 text-slate-300 hover:text-rose-600 transition" title="Excluir">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </div>
                         </div>
-
                     </div>
                 `;
             }).join('');
         }
 
-        // Select Patient for EHR
+        // Select Active Patient
         function selectPatient(id) {
             selectedPatientId = id;
-            renderQueue();
+            renderSelectedPatientBar();
+            renderQueues();
             renderEHR();
+            renderAssessment();
+            renderDemographics();
         }
 
-        // Render Electronic Health Record
-        function renderEHR() {
-            const patient = patients.find(p => p.id === selectedPatientId);
-            
-            const nameEl = document.getElementById('ehr-patient-name');
-            const condEl = document.getElementById('ehr-patient-condition');
-            const priorityBadgeEl = document.getElementById('ehr-priority-badge');
-            
-            if (!patient) {
-                nameEl.innerText = 'Nenhum Paciente Selecionado';
-                condEl.innerText = 'Selecione um paciente na fila ao lado';
-                priorityBadgeEl.innerHTML = '';
-                document.getElementById('ehr-pa').value = '';
-                document.getElementById('ehr-fc').value = '';
-                document.getElementById('ehr-spo2').value = '';
-                document.getElementById('ehr-eva').value = '';
-                document.getElementById('ehr-history').innerHTML = '<p class="text-xs text-slate-400">Nenhum histórico disponível.</p>';
-                return;
-            }
-
-            nameEl.innerText = patient.nome;
-            condEl.innerText = patient.condicao;
-
-            // Render Badge in Header
-            let badgeStyle = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
-            if (patient.prioridade === 'Alta') badgeStyle = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
-            if (patient.prioridade === 'Média') badgeStyle = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
-
-            priorityBadgeEl.innerHTML = `
-                <span class="text-xs font-bold px-2.5 py-1 rounded-lg border ${badgeStyle}">
-                    ${patient.prioridade}
-                </span>
-            `;
-
-            // Fill Vital Signs Inputs
-            document.getElementById('ehr-pa').value = patient.sinaisVitais.pa || '';
-            document.getElementById('ehr-fc').value = patient.sinaisVitais.fc || '';
-            document.getElementById('ehr-spo2').value = patient.sinaisVitais.spo2 || '';
-            document.getElementById('ehr-eva').value = patient.sinaisVitais.eva || '';
-
-            // Render History Timeline
-            const historyContainer = document.getElementById('ehr-history');
-            if (patient.historico && patient.historico.length > 0) {
-                historyContainer.innerHTML = patient.historico.map(h => `
-                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs">
-                        <div class="flex justify-between items-center text-[10px] text-slate-400 mb-1">
-                            <span class="font-semibold text-teal-700"><i class="fa-solid fa-user-doctor"></i> Estagiário / Monitor</span>
-                            <span>${h.data}</span>
-                        </div>
-                        <p class="text-slate-700 leading-relaxed">${h.texto}</p>
-                    </div>
-                `).join('');
-            } else {
-                historyContainer.innerHTML = `<p class="text-xs text-slate-400">Sem registros anteriores.</p>`;
-            }
-        }
-
-        // Live Vital Signs Update
-        function updateCurrentVitals() {
-            if (!selectedPatientId) return;
-            const patient = patients.find(p => p.id === selectedPatientId);
-            if (!patient) return;
-
-            patient.sinaisVitais.pa = document.getElementById('ehr-pa').value;
-            patient.sinaisVitais.fc = document.getElementById('ehr-fc').value;
-            patient.sinaisVitais.spo2 = document.getElementById('ehr-spo2').value;
-            patient.sinaisVitais.eva = document.getElementById('ehr-eva').value;
-
-            saveData();
-            showToast('Sinais vitais atualizados!');
-        }
-
-        // Save SOAP Evolution Note
-        function saveEvolution() {
-            if (!selectedPatientId) {
-                showToast('Selecione um paciente para salvar a evolução.', 'fa-circle-exclamation');
-                return;
-            }
-
-            const input = document.getElementById('ehr-notes-input');
-            const text = input.value.trim();
-
-            if (!text) {
-                showToast('Escreva algum comentário antes de salvar.', 'fa-circle-exclamation');
-                return;
-            }
-
-            const patient = patients.find(p => p.id === selectedPatientId);
-            if (!patient) return;
-
-            const now = new Date();
-            const timestamp = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-            patient.historico.unshift({
-                data: timestamp,
-                texto: text
-            });
-
-            input.value = '';
-            saveData();
-            renderEHR();
-            showToast('Evolução clínica salva no prontuário!');
-        }
-
-        // Change Patient Status
-        function changeStatus(id, newStatus) {
+        // Change Queue Status
+        function changePatientStatus(id, newStatus) {
             const patient = patients.find(p => p.id === id);
             if (!patient) return;
-
             patient.status = newStatus;
-
-            const now = new Date();
-            const timestamp = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-            patient.historico.unshift({
-                data: timestamp,
-                texto: `Status alterado para: ${newStatus}`
-            });
-
-            saveData();
-            renderQueue();
-            if (selectedPatientId === id) renderEHR();
-            showToast(`Status de ${patient.nome} alterado para '${newStatus}'!`);
+            saveToStorage();
+            renderAll();
+            showToast(`Status de "${patient.nome}" alterado para ${newStatus}!`);
         }
 
         // Delete Patient
@@ -778,20 +950,301 @@
             if (selectedPatientId === id) {
                 selectedPatientId = patients.length > 0 ? patients[0].id : null;
             }
-            saveData();
-            renderQueue();
-            renderEHR();
-            showToast('Paciente removido da fila.');
+            saveToStorage();
+            renderAll();
+            showToast('Paciente removido do sistema.');
         }
 
-        // UI Toast Notification helper
-        function showToast(message, iconClass = 'fa-circle-check') {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-message');
-            const iconEl = document.getElementById('toast-icon');
+        // Tab 2: EHR & Vitals Logic
+        function renderEHR() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            if (!patient) return;
 
-            msgEl.innerText = message;
-            iconEl.className = `fa-solid ${iconClass} text-emerald-400 text-lg`;
+            document.getElementById('vital-pa').value = patient.sinaisVitais.pa || '';
+            document.getElementById('vital-fc').value = patient.sinaisVitais.fc || '';
+            document.getElementById('vital-spo2').value = patient.sinaisVitais.spo2 || '';
+            document.getElementById('vital-fr').value = patient.sinaisVitais.fr || '';
+            document.getElementById('vital-eva').value = patient.sinaisVitais.eva || '0/10';
+
+            // Intern Checkboxes
+            const checkboxContainer = document.getElementById('intern-checkboxes-container');
+            checkboxContainer.innerHTML = interns.map(i => {
+                const isChecked = patient.estagiarios.includes(i.nome);
+                return `
+                    <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer bg-slate-50 p-2 rounded-lg border border-slate-200">
+                        <input type="checkbox" value="${i.nome}" ${isChecked ? 'checked' : ''} class="intern-checkbox accent-teal-600">
+                        <span class="font-medium">${i.nome}</span>
+                        <span class="text-[10px] text-slate-400 ml-auto">${i.matricula}</span>
+                    </label>
+                `;
+            }).join('');
+
+            // History SOAP Timeline
+            const historyContainer = document.getElementById('ehr-history-container');
+            if (patient.historicoSOAP && patient.historicoSOAP.length > 0) {
+                historyContainer.innerHTML = patient.historicoSOAP.map(h => `
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-xs space-y-1">
+                        <div class="flex justify-between items-center text-[10px] text-slate-400">
+                            <span class="font-bold text-teal-700"><i class="fa-solid fa-user-doctor"></i> Estágio Supervisionado</span>
+                            <span>${h.data}</span>
+                        </div>
+                        <p class="text-slate-700 whitespace-pre-line leading-relaxed">${h.texto}</p>
+                    </div>
+                `).join('');
+            } else {
+                historyContainer.innerHTML = `<p class="text-xs text-slate-400">Nenhum registro de evolução salvo.</p>`;
+            }
+        }
+
+        function saveVitals() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            if (!patient) return;
+
+            patient.sinaisVitais.pa = document.getElementById('vital-pa').value;
+            patient.sinaisVitais.fc = document.getElementById('vital-fc').value;
+            patient.sinaisVitais.spo2 = document.getElementById('vital-spo2').value;
+            patient.sinaisVitais.fr = document.getElementById('vital-fr').value;
+            patient.sinaisVitais.eva = document.getElementById('vital-eva').value;
+
+            saveToStorage();
+            showToast('Sinais vitais salvos no prontuário!');
+        }
+
+        function saveAssignedInterns() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            if (!patient) return;
+
+            const selected = [];
+            document.querySelectorAll('.intern-checkbox:checked').forEach(cb => {
+                selected.push(cb.value);
+            });
+
+            patient.estagiarios = selected;
+            saveToStorage();
+            renderSelectedPatientBar();
+            renderQueues();
+            showToast('Estagiários atribuídos ao atendimento!');
+        }
+
+        function saveSoapEvolution() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            if (!patient) return;
+
+            const s = document.getElementById('soap-s').value.trim();
+            const o = document.getElementById('soap-o').value.trim();
+            const a = document.getElementById('soap-a').value.trim();
+            const p = document.getElementById('soap-p').value.trim();
+
+            if (!s && !o && !a && !p) {
+                showToast('Preencha ao menos um campo da evolução SOAP.', 'fa-triangle-exclamation');
+                return;
+            }
+
+            const now = new Date();
+            const timestamp = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            const fullSOAP = `[S] ${s || 'Sem observações'}\n[O] ${o || 'Sem observações'}\n[A] ${a || 'Sem observações'}\n[P] ${p || 'Sem observações'}`;
+
+            patient.historicoSOAP.unshift({
+                data: timestamp,
+                texto: fullSOAP
+            });
+
+            // Clear inputs
+            document.getElementById('soap-s').value = '';
+            document.getElementById('soap-o').value = '';
+            document.getElementById('soap-a').value = '';
+            document.getElementById('soap-p').value = '';
+
+            saveToStorage();
+            renderEHR();
+            showToast('Evolução SOAP registrada com sucesso!');
+        }
+
+        // Tab 3: Assessment Logic
+        function renderAssessment() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            if (!patient) return;
+
+            document.getElementById('eval-qp').value = patient.avaliacao.qp || '';
+            document.getElementById('eval-hma').value = patient.avaliacao.hma || '';
+            document.getElementById('eval-adm').value = patient.avaliacao.adm || '';
+            document.getElementById('eval-force').value = patient.avaliacao.forca || '';
+            document.getElementById('eval-posture').value = patient.avaliacao.postura || '';
+            document.getElementById('eval-plan').value = patient.avaliacao.plano || '';
+        }
+
+        function saveAssessment() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            if (!patient) return;
+
+            patient.avaliacao = {
+                qp: document.getElementById('eval-qp').value,
+                hma: document.getElementById('eval-hma').value,
+                adm: document.getElementById('eval-adm').value,
+                forca: document.getElementById('eval-force').value,
+                postura: document.getElementById('eval-posture').value,
+                plano: document.getElementById('eval-plan').value
+            };
+
+            saveToStorage();
+            showToast('Ficha de avaliação salva!');
+        }
+
+        // Tab 4: Demographics Logic
+        function renderDemographics() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            if (!patient) return;
+
+            document.getElementById('reg-fullname').value = patient.nome || '';
+            document.getElementById('reg-cpf').value = patient.demograficos.cpf || '';
+            document.getElementById('reg-age').value = patient.demograficos.idade || '';
+            document.getElementById('reg-phone').value = patient.demograficos.telefone || '';
+            document.getElementById('reg-emergency').value = patient.demograficos.emergencia || '';
+            document.getElementById('reg-group').value = patient.grupo || 'Grupo Coluna Saúde';
+            document.getElementById('reg-address').value = patient.demograficos.endereco || '';
+            document.getElementById('reg-comorbidities').value = patient.demograficos.comorbidades || '';
+            document.getElementById('reg-meds').value = patient.demograficos.medicamentos || '';
+        }
+
+        function saveDemographics() {
+            const patient = patients.find(p => p.id === selectedPatientId);
+            if (!patient) return;
+
+            patient.nome = document.getElementById('reg-fullname').value;
+            patient.grupo = document.getElementById('reg-group').value;
+            patient.demograficos = {
+                cpf: document.getElementById('reg-cpf').value,
+                idade: document.getElementById('reg-age').value,
+                telefone: document.getElementById('reg-phone').value,
+                emergencia: document.getElementById('reg-emergency').value,
+                endereco: document.getElementById('reg-address').value,
+                comorbidades: document.getElementById('reg-comorbidities').value,
+                medicamentos: document.getElementById('reg-meds').value
+            };
+
+            saveToStorage();
+            renderSelectedPatientBar();
+            renderQueues();
+            showToast('Dados cadastrais atualizados!');
+        }
+
+        // Tab 5: Interns Management Logic
+        function renderInternsTab() {
+            document.getElementById('intern-count-badge').innerText = `${interns.length} Alunos`;
+            const container = document.getElementById('interns-list-container');
+
+            if (interns.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 col-span-2">Nenhum estagiário cadastrado.</p>`;
+                return;
+            }
+
+            container.innerHTML = interns.map(i => `
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-xs">${i.nome}</h4>
+                            <p class="text-[10px] text-slate-400">${i.matricula}</p>
+                        </div>
+                    </div>
+                    <button onclick="removeIntern('${i.id}')" class="text-slate-300 hover:text-rose-600 transition text-xs p-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function handleAddIntern(event) {
+            event.preventDefault();
+            const name = document.getElementById('new-intern-name').value.trim();
+            const mat = document.getElementById('new-intern-id').value.trim() || 'Estágio II';
+
+            if (!name) return;
+
+            interns.push({
+                id: 'i_' + Date.now(),
+                nome: name,
+                matricula: mat
+            });
+
+            document.getElementById('new-intern-name').value = '';
+            document.getElementById('new-intern-id').value = '';
+
+            saveToStorage();
+            renderInternsTab();
+            renderEHR();
+            showToast('Estagiário cadastrado na equipe!');
+        }
+
+        function removeIntern(id) {
+            interns = interns.filter(i => i.id !== id);
+            saveToStorage();
+            renderInternsTab();
+            renderEHR();
+            showToast('Estagiário removido.');
+        }
+
+        function updateSupervisor() {
+            const name = document.getElementById('input-supervisor').value.trim();
+            if (name) {
+                currentSupervisor = name;
+                saveToStorage();
+                document.getElementById('header-supervisor-name').innerText = currentSupervisor;
+                showToast('Nome do supervisor atualizado!');
+            }
+        }
+
+        // Modal New Patient Controls
+        function openNewPatientModal() {
+            document.getElementById('modal-new-patient').classList.remove('hidden');
+        }
+
+        function closeNewPatientModal() {
+            document.getElementById('modal-new-patient').classList.add('hidden');
+        }
+
+        function handleCreatePatient(event) {
+            event.preventDefault();
+            const name = document.getElementById('modal-name').value.trim();
+            const group = document.getElementById('modal-group').value;
+            const priority = document.getElementById('modal-priority').value;
+            const condition = document.getElementById('modal-condition').value.trim();
+            const pa = document.getElementById('modal-pa').value.trim() || '120/80 mmHg';
+            const fc = document.getElementById('modal-fc').value.trim() || '75 bpm';
+
+            const newPatient = {
+                id: 'p_' + Date.now(),
+                nome: name,
+                grupo: group,
+                condicao: condition,
+                prioridade: priority,
+                status: 'Aguardando',
+                estagiarios: [],
+                sinaisVitais: { pa, fc, spo2: '98%', fr: '16 ipm', eva: '4/10' },
+                demograficos: { cpf: '', idade: '', telefone: '', emergencia: '', endereco: '', comorbidades: '', medicamentos: '' },
+                avaliacao: { qp: condition, hma: '', adm: '', forca: '', postura: '', plano: '' },
+                historicoSOAP: [
+                    { data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}), texto: '[S] Cadastrado na triagem inicial.\n[O] Sinais vitais checados.\n[A] Apto para fila.\n[P] Aguardando convocação.' }
+                ]
+            };
+
+            patients.unshift(newPatient);
+            selectedPatientId = newPatient.id;
+
+            saveToStorage();
+            closeNewPatientModal();
+            renderAll();
+            showToast('Novo paciente cadastrado na fila!');
+        }
+
+        // Toast Helper
+        function showToast(msg, icon = 'fa-circle-check') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            document.getElementById('toast-icon').className = `fa-solid ${icon} text-emerald-400 text-lg`;
 
             toast.classList.remove('translate-y-20', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
@@ -799,7 +1252,7 @@
             setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-20', 'opacity-0');
-            }, 2800);
+            }, 2600);
         }
     </script>
 </body>
